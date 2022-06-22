@@ -41,5 +41,22 @@
  * git remote add origin 깃 저장소 링크를 추가한다.
  * origin : 복제한 원격 git 저장소의 기본이름
  * git remote : origin 복제한 url을 참조하기 위해 호출
- * git remote add origin http
+ * git remote add origin "https://~~~" 이건 자신의 깃저장소 주소를 추가해준다.
+ * 
+ * cd "이동할 경로": 경로 변경하는데 
+ * 
+ * ls : 경로에 있는 파일 구조를 볼 수 있다.
+ * 
+ * git 저장소가 초기화 된 경로인지 확인 잘하고 사용
+ * 초기화 경로는 git init을 한 경로
+ * 
+ * git push -u origin main 깃 저장소에 첫 커밋을 푸쉬
+ * 
+ * 소스제어 탭을 선택시 git 그래프에 변경사항 중 파일이름 옆에
+ * 
+ * U : 저장소에 없는 새로운 파일
+ * 
+ * M : 저장소에 파일은 있고 내용이 변경되었을때
+ * 
+ * D : 저장소에 있는 파일이 제거 되었을때
  */
