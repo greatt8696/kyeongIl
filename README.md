@@ -27,4 +27,4 @@ const num = 0;
 제목|이름|날짜
 제목|이름|날짜
 
-https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F997E5C3C5BA1E68137
+![img1 daumcdn](https://user-images.githubusercontent.com/88331836/174937421-96d698e6-0ff8-45be-84a5-a3dda0ec1dec.jpg)
