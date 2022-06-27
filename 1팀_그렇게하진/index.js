@@ -1,108 +1,104 @@
-const canvas = document.querySelector('canvas');
-const c = canvas.getContext('2d');
+const canvas = document.querySelector("canvas");
+const c = canvas.getContext("2d");
 
+let animationId;
+const missles = [];
+const enemies = [];
+const particles = [];
+const PARTICLE = 2;
+const ENEMYSPEED = 9;
+const SPWAN = 200;
+const MAX = 130;
+const MIN = 20;
+const DAMAGE = 5;
+const ATKSPEED = 1000;
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-onresize = () => {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-};
+// onresize = () => {
+//   canvas.width = innerWidth;
+//   canvas.height = innerHeight;
+// };
 
 //다중입력 //////////////////////////////////////////////
-window.addEventListener('keydown', keysPressed, false);
-window.addEventListener('keyup', keysReleased, false);
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
 
-const keys = {};
+const keys = {
+  ArrowLeft: false,
+  ArrowDown: false,
+  ArrowUp: false,
+  ArrowRight: false,
+};
 
-const playerKeyVelocity = {
+const playerKeyVelocityMinus = {
+  x: 0,
+  y: 0,
+};
+const playerKeyVelocityPlus = {
   x: 0,
   y: 0,
 };
 
-function keysPressed(e) {
-  keys[e.keyCode] = true;
-  console.log(keys);
+let h = 0; // 0 - 59
+let m = 0; // 0 - 59
+let s = 0; // 0 - 59
+let ms = 0; // 0 - 99
+let timerId;
 
-  console.log(playerKeyVelocity);
-  // Ctrl + Space
-  if (keys[38]) {
-    //up
-    playerKeyVelocity.y = 1;
-    playerKeyVelocity.x = 0;
+function showTime() {
+  if (h === 60) {
+    h += 1;
+    m = 0;
   }
-  if (keys[40]) {
-    //down
-    playerKeyVelocity.y = -1;
-    playerKeyVelocity.x = 0;
+
+  if (s === 60) {
+    m += 1;
+    s = 0;
   }
-  if (keys[37]) {
-    //left
-    playerKeyVelocity.y = 0;
-    playerKeyVelocity.x = 1;
+
+  if (ms === 99) {
+    s += 1;
+    ms = 0;
   }
-  if (keys[39]) {
-    //right
-    playerKeyVelocity.y = 0;
-    playerKeyVelocity.x = -1;
-  }
-  if (keys[38] && keys[37]) {
-    //left & up
-    playerKeyVelocity.y = 1;
-    playerKeyVelocity.x = 1;
-  }
-  if (keys[40] && keys[39]) {
-    //left & up
-    playerKeyVelocity.y = -1;
-    playerKeyVelocity.x = -1;
-  }
+
+  const string_h = h < 10 ? "0" + h : h;
+  const string_m = m < 10 ? "0" + m : m;
+  const string_s = s < 10 ? "0" + s : s;
+  const string_ms = ms < 10 ? "0" + ms : ms;
+
+  ms++;
+
+  const time = string_h + ":" + string_m + ":" + string_s + ":" + string_ms;
+
+  document.getElementById("MyClockDisplay").innerHTML = time;
+
+  // document.getElementById("MyClockDisplay").textContent = time;
+
+  timerId = setTimeout(showTime, 10);
+}
+
+function keyEvent() {
+  playerKeyVelocityPlus.y = keys["ArrowUp"] ? 1 : 0;
+  playerKeyVelocityMinus.y = keys["ArrowDown"] ? -1 : 0;
+  playerKeyVelocityPlus.x = keys["ArrowLeft"] ? 1 : 0;
+  playerKeyVelocityMinus.x = keys["ArrowRight"] ? -1 : 0;
+}
+
+function keysPressed(e) {
+  keys[e.key] = true;
+  keyEvent();
 }
 
 function keysReleased(e) {
-  keys[e.keyCode] = false;
-  // Ctrl + Space
-  if (!keys[38]) {
-    //up
-    playerKeyVelocity.y = 0;
-  }
-  if (!keys[40]) {
-    //down
-    playerKeyVelocity.y = 0;
-  }
-  if (!keys[37]) {
-    //left
-    playerKeyVelocity.x = 0;
-  }
-  if (!keys[39]) {
-    //right
-    playerKeyVelocity.x = 0;
-  }
+  keys[e.key] = false;
+  keyEvent();
 }
-
-// onkeydown = (event) => {
-//   console.log(event);
-//   switch (event.key) {
-//     case 'ArrowUp': //38
-//       playerKeyVelocity.y = 1;
-//       break;
-//     case 'ArrowDown': //40
-//       playerKeyVelocity.y = -1;
-//       break;
-//     case 'ArrowLeft': //37
-//       playerKeyVelocity.x = 1;
-//       break;
-//     case 'ArrowRight': //39
-//       playerKeyVelocity.x = -1;
-//       break;
-//     default:
-//       break;
-//   }
-// };
 
 //////////////////////////////////////////////////////////
 
 class Player {
-  constructor(position, radius, color, damage = 10) {
+  constructor(position, radius, color, damage = DAMAGE) {
     this.pos = position;
     this.radius = radius;
     this.color = color;
@@ -123,7 +119,7 @@ class Missile {
     this.radius = radius;
     this.color = color;
     this.velocity = velocity;
-    this.speed = 5;
+    this.speed = 2;
   }
   draw() {
     c.beginPath();
@@ -164,8 +160,14 @@ class Enemy {
     };
     this.velocity = velocity;
     this.draw();
-    this.pos.x += this.velocity.x * this.speed + playerKeyVelocity.x;
-    this.pos.y += this.velocity.y * this.speed + playerKeyVelocity.y;
+    this.pos.x +=
+      this.velocity.x * this.speed +
+      playerKeyVelocityMinus.x +
+      playerKeyVelocityPlus.x;
+    this.pos.y +=
+      this.velocity.y * this.speed +
+      playerKeyVelocityMinus.y +
+      playerKeyVelocityPlus.y;
   }
 }
 
@@ -194,20 +196,46 @@ class Particle {
     this.velocity.y *= this.friction;
     this.pos.x += this.velocity.x * this.speed;
     this.pos.y += this.velocity.y * this.speed;
-    this.alpha -= 0.01;
+    this.alpha -= 0.03;
   }
 }
 
-let animationId;
-const missles = [];
-const enemies = [];
-const particles = [];
-
 const player = new Player(
   { x: innerWidth / 2, y: innerHeight / 2 },
-  66,
-  'blue'
+  35,
+  "blue"
 );
+
+function autoAtk() {
+  let angle;
+  enemies.forEach((enemy) => {
+    angle = Math.atan2(
+      enemy.pos.y - canvas.height / 2,
+      enemy.pos.x - canvas.width / 2
+    );
+    const velocity = {
+      x: Math.cos(angle),
+      y: Math.sin(angle),
+    };
+
+    missles.push(
+      new Missile(
+        {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+        },
+        5,
+        "white",
+        velocity
+      )
+    );
+    console.log(missles);
+  });
+}
+
+const autoATkId = setInterval(() => {
+  autoAtk();
+}, ATKSPEED);
 
 onclick = (event) => {
   const angle = Math.atan2(
@@ -226,7 +254,7 @@ onclick = (event) => {
         y: canvas.height / 2,
       },
       5,
-      'purple',
+      "white",
       velocity
     )
   );
@@ -234,22 +262,21 @@ onclick = (event) => {
 
 function randomPosition(gap) {
   let randomX;
-  let randomy;
-  const xyChoice = Math.random() < 0.5 ? false : true;
+  let randomY;
+  const selectXY = Math.random() < 0.5 ? false : true;
 
-  if (xyChoice) {
+  if (selectXY) {
     randomX = Math.random() < 0.5 ? 0 - gap : canvas.width + gap;
-    randomy = Math.random() * canvas.height;
+    randomY = Math.random() * canvas.height;
   } else {
     randomX = Math.random() * canvas.width;
-    randomy = Math.random() < 0.5 ? 0 - gap : canvas.height + gap;
+    randomY = Math.random() < 0.5 ? 0 - gap : canvas.height + gap;
   }
-  return { x: randomX, y: randomy };
+
+  return { x: randomX, y: randomY };
 }
 
 function randomRadius() {
-  const MAX = 60;
-  const MIN = 30;
   return Math.random() * (MAX - MIN) + MIN;
 }
 
@@ -268,28 +295,16 @@ function spawnEnemies() {
       x: Math.cos(angle),
       y: Math.sin(angle),
     };
-    const speed = (Math.random() + 5) * 0.1;
+    const speed = (Math.random() + ENEMYSPEED) * 0.1;
 
     enemies.push(new Enemy(position, radius, color, velocity, speed));
-  }, 1000);
-}
-
-function removeMissle(missle, idx) {
-  if (
-    missle.pos.x - missle.radius < 0 ||
-    missle.pos.x - missle.radius > canvas.width ||
-    missle.pos.y - missle.radius < 0 ||
-    missle.pos.y - missle.radius > canvas.height
-  ) {
-    setTimeout(() => {
-      missles.splice(idx, 1);
-    });
-  }
+  }, SPWAN);
 }
 
 function animate() {
+  // console.log(enemies.length);
   animationId = requestAnimationFrame(animate);
-  c.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  c.fillStyle = "rgba(0, 0, 0, 0.4)";
   c.fillRect(0, 0, canvas.width, canvas.height);
   player.draw();
 
@@ -299,7 +314,9 @@ function animate() {
 
   particles.forEach((particle, idx) => {
     if (particle.alpha <= 0) {
-      particles.splice(idx);
+      setTimeout(() => {
+        particles.splice(idx, 1);
+      }, 0);
     } else {
       particle.update();
     }
@@ -313,6 +330,9 @@ function animate() {
     );
     if (playerEnemyDist - player.radius - enemy.radius < 1) {
       cancelAnimationFrame(animationId);
+      clearTimeout(timerId)
+      clearInterval(autoATkId)
+      document.getElementById("MyClockDisplay").classList.add("gameover");
     }
 
     missles.forEach((missle, missleIdx) => {
@@ -326,7 +346,7 @@ function animate() {
           gsap.to(enemy, {
             radius: enemy.radius - player.damage,
           });
-          for (let idx = 0; idx < 15; idx++) {
+          for (let idx = 0; idx < PARTICLE; idx++) {
             particles.push(
               new Particle(
                 {
@@ -362,3 +382,4 @@ function animate() {
 
 animate();
 spawnEnemies();
+showTime();
